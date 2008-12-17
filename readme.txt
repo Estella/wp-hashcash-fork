@@ -2,8 +2,8 @@
 
 Contributors: ecb29, donncha
 Tags: spam, antispam, anti-spam, comments, comment, pingback, trackback, wp-hashcash, plugin, security, wordpress, javascript, js
-Tested up to: 2.5.1
-Stable tag: 4.2
+Tested up to: 2.6
+Stable tag: 4.3
 
 Client-side javascript blocks all spam bots. XHTML 1.1 compliant.
 
@@ -22,7 +22,7 @@ You can read more at the [WP Hashcash plugin](http://wordpress-plugins.feifei.us
 3. Widget support to display spam statistics and edit the configuration
 4. Works with IE, Firefox, and Safari
 5. 100% standards compliant XHTML 1.1
-6. Tested with Wordpres 2.3, Firefox 2, Safari 3, and IE 7
+6. Tested with Wordpres 2.6, Firefox 2, Safari 3, and IE 7
 7. Akismet compatibility
 
 = Limitations =

@@ -5,7 +5,7 @@
  Description: Client-side javascript blocks all spam bots.  XHTML 1.1 compliant.
  Author: Elliott Back
  Author URI: http://elliottback.com
- Version: 4.2.1 fork
+ Version: 4.3
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -21,9 +21,19 @@
 
 function wphc_option($save = false){
 	if($save) {
-		update_option('plugin_wp-hashcash', $save);
+		if( function_exists( 'update_site_option' ) ) {
+			update_site_option('plugin_wp-hashcash', $save);
+		} else {
+			update_option('plugin_wp-hashcash', $save);
+		}
+
+		return $save;
 	} else {
-		$options = get_option('plugin_wp-hashcash');
+		if( function_exists( 'get_site_option' ) ) {
+			$options = get_site_option('plugin_wp-hashcash');
+		} else {
+			$options = get_option('plugin_wp-hashcash');
+		}
 
 		if(!is_array($options))
 			$options = array();
@@ -46,6 +56,8 @@ function wphc_install () {
 	$options['key'] = array();
 	$options['key-date'] = 0;
 	$options['refresh'] = 60 * 60 * 24 * 7;
+	$options['signup_active'] = 1;
+	$options['comments_active'] = 1;
 
 	// akismet compat check
 	if(function_exists('akismet_init')){
@@ -76,7 +88,7 @@ add_action('activate_wp-hashcash.php', 'wphc_install');
 function wphc_refresh(){
 	$options = wphc_option();
 
-	if(!is_array($options['key'])) {
+	if( !isset( $options[ 'signup_active' ] ) ) {
 		wphc_install();
 		return;
 	}
@@ -155,19 +167,20 @@ function wphc_add_options_to_admin() {
 
 	if (function_exists('add_options_page')) {
 		if( function_exists( 'is_site_admin' ) ) {
-			add_submenu_page('wpmu-admin.php', __('WordPress Hashcash'), __('WordPress Hashcash'), 'manage_options', __FILE__, 'wphc_admin_options');
+			add_submenu_page('wpmu-admin.php', __('WordPress Hashcash'), __('WordPress Hashcash'), 'manage_options', 'wphc_admin', 'wphc_admin_options');
 		} else {
 			add_options_page('Wordpress Hashcash', 'Wordpress Hashcash', 8, basename(__FILE__), 'wphc_admin_options');
 		}
 	}
 }
+
 function wphc_admin_options() {
 	if( function_exists( 'is_site_admin' ) && !is_site_admin() )
 		return;
 
 	$options = wphc_option();
 
-	if( !isset( $options[ 'key' ] ) ) {
+	if( !isset( $options[ 'signup_active' ] ) ) {
 		wphc_install(); // MU has no activation hook
 		$options = wphc_option();
 	}
@@ -183,6 +196,8 @@ function wphc_admin_options() {
 		$options['validate-ip'] = strip_tags(stripslashes($_POST['wphc-validate-ip']));
 		$options['validate-url'] = strip_tags(stripslashes($_POST['wphc-validate-url']));
 		$options['logging'] = strip_tags(stripslashes($_POST['wphc-logging']));
+		$options['signup_active'] = (int)$_POST['signup_active'];
+		$options['comments_active'] = (int)$_POST['comments_active'];
 		wphc_option($options);
 	}
 	
@@ -217,11 +232,10 @@ function wphc_admin_options() {
 	echo '<h3>Plugin</h3>';
 	echo '<ul>
 	<li><a href="http://wordpress-plugins.feifei.us/hashcash/">Plugin\'s Homepage</a></li>';
-	if( function_exists( 'is_site_admin' ) && !is_site_admin() ) {
+	if( function_exists( 'is_site_admin' ) && is_site_admin() ) {
 		echo '<li><a href="http://mu.wordpress.org/forums/">WordPress MU Forums</a></li>';
-	} else {
-		echo '<li><a href="http://wordpress.org/forums/">WordPress Support</a></li>';
 	}
+	echo '<li><a href="http://wordpress.org/tags/wp-hashcash">Plugin Support Forum</a></li>';
 	echo '</ul>';		
 	echo '<h3>Donation</h3>';
 	echo '<center><form action="https://www.paypal.com/cgi-bin/webscr" method="post">
@@ -232,7 +246,8 @@ function wphc_admin_options() {
 	echo '<p>Any small donation would be highly appreciated.</p>';
 	echo '<h3>Miscellaneous</h3>';
 	echo '<ul>
-	<li><a href="http://wordpress-plugins.feifei.us/">My Other WP Plugins</a></li>
+	<li><a href="http://wordpress-plugins.feifei.us/">Elliott\'s WP Plugins</a></li>
+	<li><a href="http://ocaoimh.ie/wordpress-plugins/">Donncha\'s WP Plugins</a></li>
 	</ul>';
 	echo '<h3>Statistics</h3>';
 	echo '<p>'.widget_ratio($options).'</p>';
@@ -245,8 +260,14 @@ function wphc_admin_options() {
 	<a href="http://wordpress-plugins.feifei.us/hashcash/">WordPress Hashcash plugin page</a> of my site.</p>';
 
 	echo '<h3>Standard Options</h3>';
-	echo '<form method="POST" action="?page='.basename(__FILE__).'&updated=true">';
+	echo '<form method="POST" action="?page=' . $_GET[ 'page' ] . '&updated=true">';
 	wp_nonce_field('wphc-options');
+	if( function_exists( 'is_site_admin' ) ) { // MU only
+		$signup_active = (int)$options[ 'signup_active' ];
+		$comments_active = (int)$options[ 'comments_active' ];
+		echo "<p><label>Signup protection enabled: <input type='checkbox' name='signup_active' value='1' " . ( $signup_active == '1' ? ' checked' : '' ) . " /></label></p>";
+		echo "<p><label>Comments protection enabled: <input type='checkbox' name='comments_active' value='1' " . ( $comments_active == '1' ? ' checked' : '' ) . " /></label></p>";
+	}
 	// moderation options
 	$moderate = htmlspecialchars($options['moderation'], ENT_QUOTES);
 	echo '<p><label for="wphc-moderation">' . __('Moderation:', 'wp-hashcash') . '</label>';
@@ -311,13 +332,25 @@ function wphc_admin_options() {
  * Add JS to the header
  */
 function wphc_posthead() {
-	if(is_single() || is_page())
-	{
-		wphc_addhead();
-		add_filter('preprocess_comment', 'wphc_check_hidden_tag');
+	if( function_exists( 'is_site_admin' ) ) {
+		$options = wphc_option();
+		if( !$options['comments_active'] )
+			return;
 	}
+	if((is_single() || is_page()))
+		wphc_addhead();
 }
 add_action('wp_head', 'wphc_posthead');
+
+function wphc_signuphead() {
+	if( function_exists( 'is_site_admin' ) ) {
+		$options = wphc_option();
+		if( !$options['signup_active'] )
+			return;
+	}
+	wphc_addhead();
+}
+add_action('signup_header', 'wphc_signuphead');
 
 function wphc_addhead() {
 	echo "<script type=\"text/javascript\"><!--\n";
@@ -339,7 +372,6 @@ function wphc_addhead() {
 	echo "addLoadEvent(function(){document.getElementById('wphc_value').value=wphc();});\n";
 	echo "//--></script>\n";
 }
-add_action('signup_header', 'wphc_addhead');
 
 function wphc_getjs(){
 	$options = wphc_option();
@@ -350,7 +382,7 @@ function wphc_getjs(){
 		/* Addition of n times of field value / n, + modulus:
 		 Time guarantee:  100 iterations or less */
 		case 0:
-			$inc = rand($val / 100, $val - 1) + 1;
+			$inc = rand($val / 100, $val - 1);
 			$n = floor($val / $inc);
 			$r = $val % $inc;
 		
@@ -488,9 +520,9 @@ function wphc_add_commentform(){
 			break;
 	}
 	
-	echo '<input type="hidden" id="wphc_value" name="wphc_value" value=""/>';
+	echo '<div><input type="hidden" id="wphc_value" name="wphc_value" value=""/></div>';
 	echo '<p>' . __('Powered by', 'wp-hashcash') . ' <a href="http://wordpress-plugins.feifei.us/hashcash/">WP Hashcash</a></p>';
-	echo '<noscript><small>Wordpress Hashcash needs javascript to work, but your browser has javascript disabled. Your comment will be '.$verb.'!</small></noscript>';
+	echo '<noscript><div><small>Wordpress Hashcash needs javascript to work, but your browser has javascript disabled. Your comment will be '.$verb.'!</small></div></noscript>';
 }
 
 add_action('comment_form', 'wphc_add_commentform');
@@ -499,8 +531,7 @@ add_action('comment_form', 'wphc_add_commentform');
  * Validate our tag
  */
 
-function wphc_check_signup_hidden_tag( $result ) 
-{
+function wphc_check_signup_hidden_tag( $result ) {
 	// get our options
 	$options = wphc_option();
 	$spam = false;
@@ -508,12 +539,12 @@ function wphc_check_signup_hidden_tag( $result )
 		return $result;
 
 	// Check the wphc values against the last five keys
-	$spam = !in_array($_POST["wphc_value"], (array) $options['key']);
+	$spam = !in_array($_POST["wphc_value"], $options['key']);
 	
 	if($spam){
 		$options['signups-spam'] = ((int) $options['signups-spam']) + 1;
 		wphc_option($options);
-		die( 'Sorry, a registration error occurred. Please contact the administrator' );
+		$result['errors']->add( 'blogname', __('You did not pass a spam check. Please enable JavaScript in your browser.') );
 	} else {
 		$options['signups-ham'] = ((int) $options['signups-ham']) + 1;
 		wphc_option($options);
@@ -524,8 +555,7 @@ function wphc_check_signup_hidden_tag( $result )
 add_filter( 'wpmu_validate_blog_signup', 'wphc_check_signup_hidden_tag' );
 add_filter( 'wpmu_validate_user_signup', 'wphc_check_signup_hidden_tag' );
 
-function wphc_check_hidden_tag($comment) 
-{
+function wphc_check_hidden_tag($comment) {
 	// get our options
 	$type = $comment['comment_type'];
 	$options = wphc_option();
@@ -578,7 +608,7 @@ function wphc_check_hidden_tag($comment)
 		// Check the wphc values against the last five keys
 		$spam = !in_array($_POST["wphc_value"], $options['key']);
 		if($options['logging'] && $spam)
-			$comment['comment_content'] .= "\n\n[WORDPRESS HASHCASH] The poster sent us '".intval($_POST["wphc_value"])."' which is not a hashcash value.";
+			$comment['comment_content'] .= "\n\n[WORDPRESS HASHCASH] The poster sent us '".intval($_POST["wphc_value"])." which is not a hashcash value.";
 	}
 	
 	if($spam){
@@ -605,4 +635,5 @@ function wphc_check_hidden_tag($comment)
 	return $comment;
 }
 
+add_filter('preprocess_comment', 'wphc_check_hidden_tag');
 ?>
