@@ -5,7 +5,7 @@
  Description: Client-side javascript blocks all spam bots.  XHTML 1.1 compliant.
  Author: Elliott Back
  Author URI: http://elliottback.com
- Version: 4.6
+ Version: 4.7 fork
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -143,12 +143,12 @@ function widget_ratio($options){
 add_action('admin_menu', 'wphc_add_options_to_admin');
 
 function wphc_add_options_to_admin() {
-	if( function_exists( 'is_site_admin' ) && !is_site_admin() )
+	if( function_exists( 'is_super_admin' ) && !is_super_admin() )
 		return;
 
 	if (function_exists('add_options_page')) {
-		if( function_exists( 'is_site_admin' ) ) {
-			add_submenu_page('wpmu-admin.php', __('WordPress Hashcash'), __('WordPress Hashcash'), 'manage_options', 'wphc_admin', 'wphc_admin_options');
+		if( function_exists( 'is_super_admin' ) ) {
+			add_submenu_page('options-general.php', __('WordPress Hashcash'), __('WordPress Hashcash'), 'manage_options', 'wphc_admin', 'wphc_admin_options');
 		} else {
 			add_options_page('Wordpress Hashcash', 'Wordpress Hashcash', 8, basename(__FILE__), 'wphc_admin_options');
 		}
@@ -156,7 +156,7 @@ function wphc_add_options_to_admin() {
 }
 
 function wphc_admin_options() {
-	if( function_exists( 'is_site_admin' ) && !is_site_admin() )
+	if( function_exists( 'is_super_admin' ) && !is_super_admin() )
 		return;
 
 	$options = wphc_option();
@@ -213,7 +213,7 @@ function wphc_admin_options() {
 	echo '<h3>Plugin</h3>';
 	echo '<ul>
 	<li><a href="http://wordpress-plugins.feifei.us/hashcash/">Plugin\'s Homepage</a></li>';
-	if( function_exists( 'is_site_admin' ) && is_site_admin() ) {
+	if( function_exists( 'is_super_admin' ) && is_super_admin() ) {
 		echo '<li><a href="http://mu.wordpress.org/forums/">WordPress MU Forums</a></li>';
 	}
 	echo '<li><a href="http://wordpress.org/tags/wp-hashcash">Plugin Support Forum</a></li>';
@@ -243,7 +243,7 @@ function wphc_admin_options() {
 	echo '<h3>Standard Options</h3>';
 	echo '<form method="POST" action="?page=' . $_GET[ 'page' ] . '&updated=true">';
 	wp_nonce_field('wphc-options');
-	if( function_exists( 'is_site_admin' ) ) { // MU only
+	if( function_exists( 'is_super_admin' ) ) { // MU only
 		$signup_active = (int)$options[ 'signup_active' ];
 		$comments_active = (int)$options[ 'comments_active' ];
 		echo "<p><label>Signup protection enabled: <input type='checkbox' name='signup_active' value='1' " . ( $signup_active == '1' ? ' checked' : '' ) . " /></label></p>";
@@ -313,7 +313,7 @@ function wphc_admin_options() {
  * Add JS to the header
  */
 function wphc_posthead() {
-	if( function_exists( 'is_site_admin' ) ) {
+	if( function_exists( 'is_super_admin' ) ) {
 		$options = wphc_option();
 		if( !$options['comments_active'] )
 			return;
@@ -324,7 +324,7 @@ function wphc_posthead() {
 add_action('wp_head', 'wphc_posthead');
 
 function wphc_signuphead() {
-	if( function_exists( 'is_site_admin' ) ) {
+	if( function_exists( 'is_super_admin' ) ) {
 		$options = wphc_option();
 		if( !$options['signup_active'] )
 			return;
@@ -430,22 +430,22 @@ function wphc_getjs(){
 	
 	// pack bytes
 	if( !function_exists( 'strToLongs' ) ) {
-	function strToLongs($s) {
-		$l = array();
-	    
-		// pad $s to some multiple of 4
-		$s = preg_split('//', $s, -1, PREG_SPLIT_NO_EMPTY);
-	    
-		while(count($s) % 4 != 0){
-			$s [] = ' ';
-		}
-	
-		for ($i = 0; $i < ceil(count($s)/4); $i++) {
-			$l[$i] = ord($s[$i*4]) + (ord($s[$i*4+1]) << 8) + (ord($s[$i*4+2]) << 16) + (ord($s[$i*4+3]) << 24);
-	    	}
-	
-		return $l;
-	}
+        function strToLongs($s) {
+            $l = array();
+
+            // pad $s to some multiple of 4
+            $s = preg_split('//', $s, -1, PREG_SPLIT_NO_EMPTY);
+
+            while(count($s) % 4 != 0){
+                $s [] = ' ';
+            }
+
+            for ($i = 0; $i < ceil(count($s)/4); $i++) {
+                $l[$i] = ord($s[$i*4]) + (ord($s[$i*4+1]) << 8) + (ord($s[$i*4+2]) << 16) + (ord($s[$i*4+3]) << 24);
+                }
+
+            return $l;
+        }
 	}
 	
 	// xor all the bytes with a random key
@@ -521,7 +521,6 @@ add_action('comment_form', 'wphc_add_commentform');
 function wphc_check_signup_hidden_tag( $result ) {
 	// get our options
 	$options = wphc_option();
-	$spam = false;
 	if( !strpos( $_SERVER[ 'PHP_SELF' ], 'wp-signup.php' ) )
 		return $result;
 
@@ -548,7 +547,6 @@ function wphc_check_signup_for_bp(){
 
 	// get our options
 	$options = wphc_option();
-	$spam = false;
 
 	// Check the wphc values against the last five keys
 	$spam = !in_array($_POST["wphc_value"], $options['key']);
@@ -607,7 +605,7 @@ function wphc_check_hidden_tag($comment) {
 				
 				if( !empty( $snoop->results ) )
 				{
-					foreach($snoop->results as $url){
+					foreach((array) $snoop->results as $url){
 						$url = preg_replace('/(\/|\/trackback|\/trackback\/)$/', '', $url);
 						if($url == $permalink)
 							$found = true;	

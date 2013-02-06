@@ -2,8 +2,8 @@
 Contributors: ecb29, donncha
 Tags: spam, antispam, anti-spam, comments, comment, pingback, trackback, wp-hashcash, plugin, security, wordpress, javascript, js, signup, sign-up, wp-login.php, wp-signup.php, buddypress, bp, WPMU
 Tested up to: 3.2.1
-Stable tag: 4.6
-Requires at least: 2.9.2
+Stable tag: 4.7 fork
+Requires at least: 3.1
 
 Client-side javascript blocks all spam bots. XHTML 1.1 compliant.
 
@@ -56,12 +56,13 @@ If you are upgrading from a previous version of WP-Hashcash, please disabled the
 * "Why am I not worried about comment spam anymore? Because of my awesome new blog plugin, Spam Stopgap Extreme. This baby blocks any bot trying to post to my blog. No blacklists, no moderation, no 'spam points', no nothing. You won't even know that it's working."
 * "I haven't had anything to 'deal' with in several weeks. That's a nice thing. I've also had a bunch of folks leave legitimate comments that have gotten through. It's all good."
 
-== Upgrade Notice ==
-
-= 4.6 =
-Removed front facing links to comply with WordPress.org plugin guidelines.
 
 == Changelog ==
+
+= 4.7 =
+
+* WP 3.5 compat
+* Changed over from wpmu implementation to WP super_admin
 
 = 4.6 =
 * Removed links from the blog linking back to Hashcash homepage to comply with WordPress.org plugin guidelines. Props Ryan Hellyer.
