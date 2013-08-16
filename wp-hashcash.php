@@ -5,7 +5,7 @@
  Description: Client-side javascript blocks all spam bots.  XHTML 1.1 compliant.
  Author: Elliott Back
  Author URI: http://elliottback.com
- Version: 4.7 fork
+ Version: 4.7.1 fork
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
