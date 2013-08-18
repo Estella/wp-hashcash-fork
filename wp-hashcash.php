@@ -1,11 +1,11 @@
 <?php
 /*
- Plugin Name: WordPress Hashcash
+ Plugin Name: WordPress Hashcash Reloaded
  Plugin URI: http://wordpress-plugins.feifei.us/hashcash/
  Description: Client-side javascript blocks all spam bots.  XHTML 1.1 compliant.
- Author: Elliott Back
- Author URI: http://elliottback.com
- Version: 4.7.1 fork
+ Author: Mike Koepke
+ Author URI: http://www.semiologic.com
+ Version: 4.7.2 fork
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

@@ -1,9 +1,11 @@
-=== WP-Hashcash ===
-Contributors: ecb29, donncha
+=== WP-Hashcash Reloaded ===
+Contributors: ecb29, donncha, Mike_Koepke
 Tags: spam, antispam, anti-spam, comments, comment, pingback, trackback, wp-hashcash, plugin, security, wordpress, javascript, js, signup, sign-up, wp-login.php, wp-signup.php, buddypress, bp, WPMU
 Requires at least: 3.3
 Tested up to: 3.6
 Stable tag: trunk
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Client-side javascript blocks all spam bots. XHTML 1.1 compliant.
 
@@ -11,19 +13,21 @@ Client-side javascript blocks all spam bots. XHTML 1.1 compliant.
 
 = No More Spam =
 
-WP Hashcash is an antispam plugin that eradicates comment spam on Wordpress blogs. It works because your visitors must use obfuscated javascript to submit a proof-of-work that indicates they opened your website in a web browser, not a robot. If the javascript check fails, WP Hashcash now gives you three options; it can either put the comment into moderation (default), put the comment in the akismet queue, or delete it.
+WP-Hashcash Reloaded is an antispam plugin that eradicates comment spam on WordPress blogs. It works because your visitors must use obfuscated javascript to submit a proof-of-work that indicates they opened your website in a web browser, not a robot. If the javascript check fails, WP Hashcash now gives you three options; it can either put the comment into moderation (default), put the comment in the akismet queue, or delete it.
 
-You can read more at the [WP Hashcash plugin](http://wordpress-plugins.feifei.us/hashcash/) page.  WP Hashcash is 100% GPL compatible.
+This is a forked version of the original WP-Hashcash plugin by [Elliott Back](ttp://elliottback.com).
+
+You can read more about the original version at the [WP Hashcash plugin](http://wordpress-plugins.feifei.us/hashcash/) page.
 
 = Features =
 
 1. Blocks all comment spam, but not real comments
 2. Also prevents most trackback / pingback spam
-3. Also protects signup pages for Wordpress (WP), BuddyPress (BP), and Wordpress Multi-User (WPMU)
+3. Also protects signup pages for WordPress (WP), BuddyPress (BP), and WordPress Multi-User (WPMU)
 4. Widget support to display spam statistics and edit the configuration
-5. Works with IE, Firefox, and Safari
+5. Works with IE, Firefox, Chrome, and Safari
 6. 100% standards compliant XHTML 1.1, works with jQuery and Prototype
-7. Tested with Wordpres 2, Firefox, Safari, IE, and Chrome
+7. Tested with WordPress 3.6, Firefox, Safari, IE, and Chrome
 8. Akismet compatibility
 
 = Limitations =
@@ -34,30 +38,18 @@ WP Hashcash relies on the presence of two hooks in your theme, `wp_head` and `co
 
 = Installation Instructions =
 
-To install WP Hashcash, please download the plugin and unzip it, then copy the wp-hashcash.php file to wp-content/plugins. Activate the plugin and drag into your Widgetized sidebar for public statistics, or visit Options, WP Hashcash from the admin panel to configure options.
+1. To install WP-Hashcash, please download the plugin and unzip it, then copy the wp-hashcash.php file to wp-content/plugins.
 
 = Notes =
 
 If you are upgrading from a previous version of WP-Hashcash, please disabled the plugin, then delete its files entirely.  Then, upload the latest plugin files and activate!
 
-== Screenshots ==
-
-1. Wordpress Hashcash Options Screen
-
-== Testimonials ==
-
-* "One of my favorites"
-* "this is a clever idea that I think might work well"
-* "I haven't had a single comment spam in my comment moderation queue for over a week now. I'm feeling the love!"
-* "The least annoying one I have found"
-* "this thing was a trivial install"
-* "a fancier technique"
-* "Comment Spam is a thing of the past, and I owe it to Spam Stopgap Extreme. If you use WordPress, I highly recommend installing this plugin. It has completely eliminated the comment spam problem I was having. I no longer need the spammer Tarpit plugin, or anything."
-* "Why am I not worried about comment spam anymore? Because of my awesome new blog plugin, Spam Stopgap Extreme. This baby blocks any bot trying to post to my blog. No blacklists, no moderation, no 'spam points', no nothing. You won't even know that it's working."
-* "I haven't had anything to 'deal' with in several weeks. That's a nice thing. I've also had a bunch of folks leave legitimate comments that have gotten through. It's all good."
-
 
 == Changelog ==
+
+= 4.7.2 =
+
+- Renamed to WP-Hashcash Reloaded
 
 = 4.7.1 =
 
