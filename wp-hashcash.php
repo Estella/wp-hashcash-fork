@@ -5,7 +5,7 @@
  Description: Client-side javascript blocks all spam bots.  XHTML 1.1 compliant.
  Author: Mike Koepke
  Author URI: http://www.semiologic.com
- Version: 4.7.2 fork
+ Version: 4.7.3 fork
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -654,4 +654,4 @@ function wphc_check_hidden_tag($comment) {
 }
 
 add_filter('preprocess_comment', 'wphc_check_hidden_tag');
-?>
+
