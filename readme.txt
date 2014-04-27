@@ -2,7 +2,7 @@
 Contributors: ecb29, donncha, Mike_Koepke
 Tags: spam, antispam, anti-spam, comments, comment, pingback, trackback, wp-hashcash, plugin, security, wordpress, javascript, js, signup, sign-up, wp-login.php, wp-signup.php, buddypress, bp, WPMU
 Requires at least: 3.3
-Tested up to: 3.8
+Tested up to: 3.9
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -46,6 +46,10 @@ If you are upgrading from a previous version of WP-Hashcash, please disabled the
 
 
 == Changelog ==
+
+= 4.7.4 =
+
+- WP 3.9 compat
 
 = 4.7.3 =
 
