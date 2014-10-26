@@ -5,7 +5,7 @@
  Description: Client-side javascript blocks all spam bots.  XHTML 1.1 compliant.
  Author: Mike Koepke
  Author URI: http://www.semiologic.com
- Version: 4.7.4 fork
+ Version: 4.7.5 fork
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
