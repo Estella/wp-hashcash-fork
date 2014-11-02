@@ -47,6 +47,10 @@ If you are upgrading from a previous version of WP-Hashcash, please disabled the
 
 == Changelog ==
 
+= 4.8 =
+
+- Move functionality for hashcash modifications contained in the sem-fixes plugin.
+
 = 4.7.5 =
 
 - WP 4.0 compat

@@ -5,7 +5,7 @@
  Description: Client-side javascript blocks all spam bots.  XHTML 1.1 compliant.
  Author: Mike Koepke
  Author URI: http://www.semiologic.com
- Version: 4.7.5 fork
+ Version: 4.8 fork
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -655,3 +655,115 @@ function wphc_check_hidden_tag($comment) {
 
 add_filter('preprocess_comment', 'wphc_check_hidden_tag');
 
+
+/**
+ * fix_plugins()
+ *
+ * @return void
+ **/
+
+function fix_hashcash() {
+	add_filter('option_plugin_wp-hashcash', 'hc_options');
+	remove_action('admin_menu', 'wphc_add_options_to_admin');
+	remove_action('widgets_init', 'wphc_widget_init');
+	remove_action('comment_form', 'wphc_add_commentform');
+	remove_action('wp_head', 'wphc_posthead');
+	add_action('comment_form', 'hc_add_message');
+	add_action('wp_head', 'hc_addhead');
+
+	if ( is_admin() )
+		remove_filter('preprocess_comment', 'wphc_check_hidden_tag');
+} # fix_hashcash()
+
+add_action( 'plugins_loaded', 'fix_hashcash');
+
+/**
+ * hc_options()
+ *
+ * @param array $o
+ * @return array $o
+ **/
+
+function hc_options($o) {
+	if ( function_exists('akismet_init') && get_option('wordpress_api_key') ) {
+		$o['moderation'] = 'akismet';
+	} else {
+		$o['moderation'] = 'delete';
+	}
+
+	$o['validate-ip'] = 'on';
+	$o['validate-url'] = 'on';
+	$o['logging'] = '';
+
+	return $o;
+} # hc_options()
+
+
+/**
+ * hc_add_message()
+ *
+ * @return void
+ **/
+
+function hc_add_message() {
+	$options = wphc_option();
+
+	switch( $options['moderation'] ) {
+	case 'delete':
+		$warning = __('WordPress Hashcash needs javascript to work, but your browser has javascript disabled. Your comment will be deleted!', 'sem-fixes');
+		break;
+	case 'akismet':
+		$warning = __('WordPress Hashcash needs javascript to work, but your browser has javascript disabled. Your comment will be queued in Akismet!', 'sem-fixes');
+		break;
+	case 'moderate':
+	default:
+		$warning = __('WordPress Hashcash needs javascript to work, but your browser has javascript disabled. Your comment will be placed in moderation!', 'sem-fixes');
+		break;
+	}
+
+	echo '<input type="hidden" id="wphc_value" name="wphc_value" value="" />' . "\n";
+	echo '<noscript><p><strong>' . $warning . '</strong></p></noscript>' . "\n";
+} # hc_add_message()
+
+
+/**
+ * hc_addhead()
+ *
+ * @return void
+ **/
+
+function hc_addhead() {
+	if ( !is_singular() )
+		return;
+
+	$hc_js = wphc_getjs();
+
+	echo <<<EOS
+
+<script type="text/javascript">
+<!--
+function addLoadEvent(func) {
+ var oldonload = window.onload;
+ if (typeof window.onload != 'function') {
+   window.onload = func;
+ } else {
+   window.onload = function() {
+     if (oldonload) {
+       oldonload();
+     }
+     func();
+   }
+ }
+}
+
+$hc_js
+
+addLoadEvent(function(){
+if ( document.getElementById('wphc_value') )
+	document.getElementById('wphc_value').value=wphc();
+});
+//-->
+</script>
+
+EOS;
+} # hc_addhead()
